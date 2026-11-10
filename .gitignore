@@ -1,0 +1,73 @@
+# ---------------------------------------------------------------------------
+# Private data -- nothing under datasets/ is committed except its code.
+#
+# records/ holds real exports (names, emails, phones, addresses, password
+# hashes), and every other folder there (to-be-ingested/, garbage/,
+# completed/, final/, batch/, hybrid/, metadata/, reports/) is derived from
+# them -- ETL outputs, provenance JSON, and charts drawn from that data.
+# Only the hand-maintained schema files (confirmed_dataset_headers.py,
+# order_dataset.py) are kept, so main.py / main_hybrid.py still import.
+# ---------------------------------------------------------------------------
+samples/*
+datasets/*
+!datasets/**/
+!datasets/**/*.py
+!datasets/**/.gitkeep
+
+# Raw data drops outside datasets/ as well -- a records/ folder anywhere
+# (samples/records/ holds a stray copy of a private export), and
+# spreadsheet formats. samples/*.csv stays: those are the synthetic
+# files generate_samples.py writes, and the test suite reads them.
+records/
+*.xlsx
+*.xls
+*.parquet
+
+# The web app's CLI writes clean/garbage/report artifacts here.
+output/
+
+# ETL log -- can echo record values from the files being processed.
+*.log
+
+# ---------------------------------------------------------------------------
+# Python
+# ---------------------------------------------------------------------------
+# Project virtualenv (recreate with: python -m venv datadev && pip install -r requirements.txt)
+datadev/*
+.venv/
+venv/
+env/
+
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+
+# Test / tooling caches
+.pytest_cache/
+.coverage
+htmlcov/
+.mypy_cache/
+.ruff_cache/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# ---------------------------------------------------------------------------
+# Secrets and local config
+# ---------------------------------------------------------------------------
+.env
+.env.*
+!.env.example
+instance/
+
+# ---------------------------------------------------------------------------
+# Editors / OS
+# ---------------------------------------------------------------------------
+.vscode/
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
+desktop.ini

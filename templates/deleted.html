@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Scoremark — Data deleted</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+  <main class="container">
+    {% if deleted %}
+    <h1>Your data has been deleted</h1>
+    <p class="lead">
+      clean.csv, garbage.csv and report.json for that run were permanently
+      removed. Your original upload was never stored, so nothing from your
+      file remains on this server. The old download links no longer work.
+    </p>
+    {% else %}
+    <h1>Nothing to delete</h1>
+    <p class="lead">
+      There's no stored data for that run — it was already deleted, or the
+      link is invalid. Either way, nothing from it remains on this server.
+    </p>
+    {% endif %}
+    <p><a href="{{ url_for('index') }}">&larr; Analyze another file</a></p>
+  </main>
+</body>
+</html>

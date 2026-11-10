@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Scoremark — Data Quality Benchmark</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+  <main class="container">
+    <h1>Scoremark</h1>
+    <p class="lead">
+      Upload a CSV and get back a data-quality report, a clean file, and a
+      garbage file — exactly what passed, what failed, and why. No file
+      format besides CSV, max 2&nbsp;MB.
+    </p>
+
+    <section class="card">
+      <h2>Try it instantly — no upload needed</h2>
+      <p class="muted">
+        Two bundled files: one with zero problems (proves this tool
+        doesn't invent issues where none exist), one with a known,
+        exact number of each problem type injected on purpose.
+      </p>
+      <div class="sample-buttons">
+        <form method="post" action="{{ url_for('analyze') }}">
+          <input type="hidden" name="sample" value="clean">
+          <button type="submit" class="btn btn-secondary">Run on clean sample</button>
+        </form>
+        <form method="post" action="{{ url_for('analyze') }}">
+          <input type="hidden" name="sample" value="messy">
+          <button type="submit" class="btn btn-secondary">Run on messy sample</button>
+        </form>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Or upload your own CSV</h2>
+      <form method="post" action="{{ url_for('analyze') }}" enctype="multipart/form-data">
+        <input type="file" name="file" accept=".csv" required>
+        <button type="submit" class="btn btn-primary">Analyze</button>
+      </form>
+    </section>
+  </main>
+</body>
+</html>

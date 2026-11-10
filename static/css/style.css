@@ -1,0 +1,164 @@
+body {
+  font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+  background: #121212;
+  color: #e5e2e1;
+  margin: 0;
+}
+
+.container {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 3rem 1.5rem;
+}
+
+h1 {
+  font-size: 2.25rem;
+  margin-bottom: 0.25rem;
+}
+
+.lead {
+  color: #c1c6d7;
+  line-height: 1.5;
+}
+
+.card {
+  background: #1c1b1b;
+  border: 1px solid #353534;
+  border-radius: 6px;
+  padding: 1.5rem;
+  margin-top: 1.5rem;
+}
+
+.muted {
+  color: #8b90a0;
+  font-size: 0.9rem;
+}
+
+.sample-buttons {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.btn {
+  display: inline-block;
+  padding: 0.6rem 1.2rem;
+  border-radius: 4px;
+  border: none;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-primary {
+  background: #adc7ff;
+  color: #002e68;
+}
+
+.btn-secondary {
+  background: #2a2a2a;
+  color: #e5e2e1;
+  border: 1px solid #414754;
+}
+
+input[type="file"] {
+  display: block;
+  margin-bottom: 1rem;
+  color: inherit;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 0.5rem;
+}
+
+th, td {
+  text-align: left;
+  padding: 0.4rem 0.6rem;
+  border-bottom: 1px solid #353534;
+}
+
+.downloads a {
+  color: #adc7ff;
+}
+
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.stat-card {
+  background: #1c1b1b;
+  border: 1px solid #353534;
+  border-radius: 6px;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.stat-number {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #adc7ff;
+}
+
+.stat-label {
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  letter-spacing: 0.05em;
+  color: #c1c6d7;
+}
+
+.stat-detail {
+  font-size: 0.8rem;
+  color: #8b90a0;
+}
+
+.charts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+}
+
+.chart-box {
+  flex: 1;
+  min-width: 220px;
+}
+
+.chart-box-wide {
+  flex: 2;
+  min-width: 320px;
+}
+
+.btn-danger {
+  background: #3a1d1d;
+  color: #ffb4ab;
+  border: 1px solid #93000a;
+}
+
+.btn-danger:hover {
+  background: #93000a;
+  color: #ffdad6;
+}
+
+.notice {
+  border-color: #7a5c00;
+}
+
+.notice h2 {
+  color: #ffb400;
+}
+
+code {
+  font-size: 0.9em;
+}
+
+.occupancy-box {
+  position: relative;
+  width: 100%;
+  margin-bottom: 1rem;
+}

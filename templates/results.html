@@ -1,0 +1,256 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Scoremark — Results</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+</head>
+<body>
+  <main class="container">
+    <h1>Results</h1>
+    <p class="muted">Source: {{ source_name }}</p>
+    <p class="lead">
+      {{ total_count }} rows analyzed — {{ clean_count }} clean, {{ garbage_count }} flagged.
+    </p>
+
+    {% set name_split = report.transformations.name_split if report.transformations else None %}
+    {% if name_split %}
+    <section class="card">
+      <h2>Name split</h2>
+      <p>
+        <code>{{ name_split.source_column }}</code> was split into
+        <code>firstname</code> and <code>lastname</code> (first word, then the rest)
+        in both output files.
+      </p>
+      <p class="muted">
+        {{ name_split.split_count }} split into two parts ·
+        {{ name_split.single_word_count }} single-word name(s), left with an empty lastname ·
+        {{ name_split.missing_count }} missing.
+      </p>
+    </section>
+    {% endif %}
+
+    {% if summary.empty_record_count or summary.malformed_count %}
+    <section class="card notice">
+      <h2>{{ summary.empty_record_count + summary.malformed_count }} row(s) set aside before scoring</h2>
+      {% if summary.empty_record_count %}
+      <p>
+        <strong>{{ summary.empty_record_count }} empty record(s)</strong> — lines
+        containing only delimiters, no text. They're in
+        <strong>garbage.csv</strong> as <code>empty_record</code>.
+      </p>
+      {% endif %}
+      {% if summary.malformed_count %}
+      <p>
+        <strong>{{ summary.malformed_count }} malformed row(s)</strong> with more
+        fields than the header — usually an unquoted delimiter inside a value,
+        such as a comma in a name. They can't be split back into columns
+        without guessing, so they weren't scored. Each one is in
+        <strong>garbage.csv</strong> with its line number and original text
+        (<code>raw_row</code>), ready to fix at the source.
+      </p>
+      <table>
+        <tr><th>Line</th><th>Fields found</th><th>Expected</th></tr>
+        {% for row in report.structure.malformed_rows %}
+        <tr><td>{{ row.line_number }}</td><td>{{ row.found_fields }}</td><td>{{ row.expected_fields }}</td></tr>
+        {% endfor %}
+      </table>
+      {% if summary.malformed_count > report.structure.malformed_rows | length %}
+      <p class="muted">First {{ report.structure.malformed_rows | length }} shown; garbage.csv lists all of them.</p>
+      {% endif %}
+      {% endif %}
+    </section>
+    {% endif %}
+
+    <section class="stat-grid">
+      <div class="stat-card">
+        <span class="stat-number">{{ summary.completeness_pct }}%</span>
+        <span class="stat-label">Completeness</span>
+        <span class="stat-detail">{{ summary.total_missing }} missing value(s) — allowed, not rejected</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-number">{{ summary.total_invalid }}</span>
+        <span class="stat-label">Validity</span>
+        <span class="stat-detail">
+          invalid value(s) across {{ summary.scored_columns }} scored column(s)
+          ({{ summary.unscored_columns }} not format-checked)
+        </span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-number">{{ summary.duplicate_pct }}%</span>
+        <span class="stat-label">Uniqueness</span>
+        <span class="stat-detail">{{ summary.duplicate_count }} duplicate row(s)</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-number">{{ summary.total_autocorrected }}</span>
+        <span class="stat-label">Consistency</span>
+        <span class="stat-detail">row(s) auto-corrected, nothing invented</span>
+      </div>
+    </section>
+
+    <section class="card charts">
+      <div class="chart-box">
+        <h2>Overview</h2>
+        <canvas id="overviewChart" width="260" height="260"></canvas>
+      </div>
+      <div class="chart-box chart-box-wide">
+        <h2>Per-column breakdown</h2>
+        <canvas id="columnChart"></canvas>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Dataset occupancy</h2>
+      <p class="muted">
+        How dense each column is: the share of {{ summary.scored_rows }} scored row(s)
+        holding a real value — not empty, and not a placeholder like NULL or N/A.
+        Missing values are allowed; this shows where they are.
+      </p>
+      <div class="occupancy-box" style="height: {{ 60 + 30 * occupancy | length }}px">
+        <canvas id="occupancyChart"></canvas>
+      </div>
+      <table>
+        <tr><th>Column</th><th>Filled</th><th>Occupancy</th></tr>
+        {% for row in occupancy %}
+        <tr><td>{{ row.column }}</td><td>{{ row.filled_count }}</td><td>{{ row.occupancy_pct }}%</td></tr>
+        {% endfor %}
+      </table>
+    </section>
+
+    <section class="card">
+      <h2>Downloads</h2>
+      <ul class="downloads">
+        <li><a href="{{ url_for('download', run_id=run_id, artifact='clean.csv') }}">clean.csv</a></li>
+        <li><a href="{{ url_for('download', run_id=run_id, artifact='garbage.csv') }}">garbage.csv</a></li>
+        <li><a href="{{ url_for('download', run_id=run_id, artifact='report.json') }}">report.json</a></li>
+      </ul>
+    </section>
+
+    <section class="card">
+      <h2>Your data</h2>
+      <p>
+        Your uploaded file was read in memory and never saved. The only
+        copies of its contents are the three downloads above, kept so the
+        links work. When you're done, delete them — this can't be undone,
+        so download anything you want to keep first.
+      </p>
+      <form method="post" action="{{ url_for('delete', run_id=run_id) }}"
+            onsubmit="return confirm('Permanently delete clean.csv, garbage.csv and report.json for this run? This cannot be undone.');">
+        <button type="submit" class="btn btn-danger">Delete my data now</button>
+      </form>
+    </section>
+
+    <section class="card">
+      <h2>Completeness — detail</h2>
+      <table>
+        <tr><th>Column</th><th>Missing</th><th>Total</th><th>%</th></tr>
+        {% for row in report.completeness %}
+        <tr>
+          <td>{{ row.column }}</td>
+          <td>{{ row.missing_count }}</td>
+          <td>{{ row.total_rows }}</td>
+          <td>{{ row.missing_pct }}%</td>
+        </tr>
+        {% endfor %}
+      </table>
+    </section>
+
+    <section class="card">
+      <h2>Validity — detail</h2>
+      <table>
+        <tr><th>Column</th><th>Type</th><th>Invalid</th><th>%</th></tr>
+        {% for row in report.validity %}
+        <tr>
+          <td>{{ row.column }}</td>
+          <td>{{ row.type }}</td>
+          {% if row.invalid_count is not none %}
+          <td>{{ row.invalid_count }}</td>
+          <td>{{ row.invalid_pct }}%</td>
+          {% else %}
+          <td colspan="2" class="muted">{{ row.note }}</td>
+          {% endif %}
+        </tr>
+        {% endfor %}
+      </table>
+    </section>
+
+    <section class="card">
+      <h2>Uniqueness — detail</h2>
+      <p>
+        Key: <strong>{{ report.uniqueness.key_columns | join(', ') }}</strong>
+        ({{ report.uniqueness.key_source }})
+      </p>
+      <p>
+        {{ report.uniqueness.duplicate_row_count }} duplicate row(s) across
+        {{ report.uniqueness.duplicate_group_count }} group(s).
+      </p>
+    </section>
+
+    <section class="card">
+      <h2>Consistency — detail</h2>
+      <table>
+        <tr><th>Column</th><th>Rule</th><th>Auto-corrected</th><th>%</th></tr>
+        {% for row in report.consistency %}
+        <tr>
+          <td>{{ row.column }}</td>
+          <td>{{ row.rule }}</td>
+          <td>{{ row.autocorrected_count }}</td>
+          <td>{{ row.autocorrected_pct }}%</td>
+        </tr>
+        {% endfor %}
+      </table>
+    </section>
+
+    <p><a href="{{ url_for('index') }}">&larr; Run another file</a></p>
+  </main>
+
+  <script id="chart-data" type="application/json">{{ chart_data | tojson }}</script>
+  <script>
+    const chartData = JSON.parse(document.getElementById("chart-data").textContent);
+
+    new Chart(document.getElementById("overviewChart"), {
+      type: "doughnut",
+      data: {
+        labels: ["Clean", "Flagged"],
+        datasets: [{
+          data: [{{ clean_count }}, {{ garbage_count }}],
+          backgroundColor: ["#4caf82", "#ff6b6b"],
+        }],
+      },
+      options: { plugins: { legend: { position: "bottom" } } },
+    });
+
+    new Chart(document.getElementById("columnChart"), {
+      type: "bar",
+      data: {
+        labels: chartData.columns,
+        datasets: [
+          { label: "Missing %", data: chartData.missing_pct, backgroundColor: "#ffb400" },
+          { label: "Invalid %", data: chartData.invalid_pct, backgroundColor: "#ff6b6b" },
+        ],
+      },
+      options: {
+        responsive: true,
+        scales: { y: { beginAtZero: true, max: 100, ticks: { callback: (v) => v + "%" } } },
+      },
+    });
+
+    new Chart(document.getElementById("occupancyChart"), {
+      type: "bar",
+      data: {
+        labels: chartData.occupancy_columns,
+        datasets: [{ label: "Occupancy %", data: chartData.occupancy_pct, backgroundColor: "#adc7ff" }],
+      },
+      options: {
+        indexAxis: "y",
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: { x: { min: 0, max: 100, ticks: { callback: (v) => v + "%" } } },
+      },
+    });
+  </script>
+</body>
+</html>
