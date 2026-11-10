@@ -8,11 +8,11 @@
 # Only the hand-maintained schema files (confirmed_dataset_headers.py,
 # order_dataset.py) are kept, so main.py / main_hybrid.py still import.
 # ---------------------------------------------------------------------------
-samples/*
-datasets/*
-!datasets/**/
-!datasets/**/*.py
-!datasets/**/.gitkeep
+samples/
+datasets/
+# !datasets/**/
+# !datasets/**/*.py
+# !datasets/**/.gitkeep
 
 # Raw data drops outside datasets/ as well -- a records/ folder anywhere
 # (samples/records/ holds a stray copy of a private export), and
