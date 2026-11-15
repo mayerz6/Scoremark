@@ -78,7 +78,20 @@ def analyze():
         # schema used here because we wrote these files ourselves and can
         # be precise, exactly as analyze.py already does for the CLI.
         source_name = SAMPLE_FILES[sample]
-        read = read_csv_rows(SAMPLES_DIR / source_name)
+        try:
+            read = read_csv_rows(SAMPLES_DIR / source_name)
+        except (FileNotFoundError, CsvStructureError) as error:
+            # A missing or corrupt bundled file is a deployment problem,
+            # not anything the visitor did -- caught here for the same
+            # reason the upload branch below catches its own parse
+            # errors: a visitor should see a clear sentence, never a bare
+            # 500 page, regardless of which side of this branch broke.
+            app.logger.error("Bundled sample %r could not be read: %s", source_name, error)
+            return (
+                "This sample is temporarily unavailable. Please try the "
+                "other sample, or upload your own CSV instead.",
+                500,
+            )
         declared_schema, key_columns = SAMPLE_SCHEMA, SAMPLE_KEY_COLUMNS
 
     elif uploaded_file and uploaded_file.filename:

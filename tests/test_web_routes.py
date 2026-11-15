@@ -204,3 +204,18 @@ def test_delete_only_accepts_post(client):
 @pytest.mark.parametrize("bad_id", ["..%2F..%2Fetc", "not-a-run", "A" * 32, "0" * 31])
 def test_delete_rejects_anything_that_is_not_a_run_id(client, bad_id):
     assert client.post(f"/delete/{bad_id}").status_code == 404
+
+
+# --- A missing bundled sample file (the exact incident that motivated
+# this test: a .gitignore rule once silently dropped samples/*.csv from
+# the deployed repo, so the "try it instantly" buttons 500'd in
+# production with no clue why) ---
+
+def test_a_missing_bundled_sample_file_fails_with_a_clear_message_not_a_bare_500(client, monkeypatch, tmp_path):
+    import app as app_module
+
+    monkeypatch.setattr(app_module, "SAMPLES_DIR", tmp_path)  # empty directory -- no CSVs in it
+    response = client.post("/analyze", data={"sample": "clean"})
+
+    assert response.status_code == 500
+    assert "temporarily unavailable" in response.get_data(as_text=True).lower()

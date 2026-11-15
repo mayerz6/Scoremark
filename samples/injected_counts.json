@@ -1,0 +1,10 @@
+{
+  "missing_phone_rows": 4,
+  "invalid_email_rows": 4,
+  "inconsistent_name_rows": 4,
+  "duplicated_rows": 5,
+  "clean_sample_row_count": 60,
+  "messy_sample_row_count": 65,
+  "leading_zero_zip_rows": 4,
+  "seed": 42
+}
